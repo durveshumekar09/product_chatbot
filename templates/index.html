@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Product Recommendation Bot</title>
+<style>
+body { font-family: Arial, sans-serif; background:#e6e6e6; display:flex; justify-content:center; padding:20px;}
+.chatbox { width:380px; background:white; border-radius:10px; padding:15px; box-shadow:0 0 10px #aaa; }
+#chat { max-height:450px; overflow-y:auto; margin-bottom:10px; }
+.msg { padding:10px 14px; margin:6px 0; border-radius:12px; max-width:80%; }
+.user { background:#d4e9ff; margin-left:auto; text-align:right; }
+.bot { background:#ececec; margin-right:auto; text-align:left; }
+input { width:80%; padding:10px; border-radius:10px; border:1px solid #ccc; }
+button { padding:10px 15px; border:none; border-radius:10px; background:#4a90e2; color:white; cursor:pointer; }
+button:hover { background:#357ab8; }
+</style>
+</head>
+<body>
+<div class="chatbox">
+    <div id="chat"></div>
+    <input id="userInput" type="text" placeholder="Type your message...">
+    <button onclick="sendMsg()">Send</button>
+</div>
+
+<script>
+function sendMsg() {
+    let input = document.getElementById("userInput");
+    let text = input.value.trim();
+    if (!text) return;
+    
+    // Show user message
+    let chat = document.getElementById("chat");
+    chat.innerHTML += `<div class="msg user">${text}</div>`;
+    input.value = "";
+    chat.scrollTop = chat.scrollHeight;
+
+    // Send to backend
+    fetch("/chat", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({message:text})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        chat.innerHTML += `<div class="msg bot">${data.response.replace(/\n/g,'<br>')}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+    });
+}
+
+// Enter key
+document.getElementById("userInput").addEventListener("keyup", function(e){
+    if(e.key === "Enter") sendMsg();
+});
+</script>
+</body>
+</html>
